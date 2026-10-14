@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 420" width="1280" height="420" role="img" aria-labelledby="t d">
+  <title id="t">Surya Pratik · Learning. Building. Improving</title>
+  <desc id="d">A beam of white light enters a glass prism and disperses into six wavelengths, one per capability.</desc>
+  <defs>
+    <clipPath id="card"><rect width="1280" height="420" rx="18"/></clipPath>
+    <radialGradient id="halo" cx="1000" cy="230" r="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1A1E28" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#0B0C0F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="600" y1="0" x2="905" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2F0E9" stop-opacity="0"/>
+      <stop offset=".45" stop-color="#F2F0E9" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#F2F0E9"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="840" y1="70" x2="1120" y2="330" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#262B38"/>
+      <stop offset=".55" stop-color="#151821"/>
+      <stop offset="1" stop-color="#1A1E28"/>
+    </linearGradient>
+    <linearGradient id="r680" x1="1064" y1="0" x2="1280" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#E8536B"/><stop offset="1" stop-color="#E8536B" stop-opacity=".25"/></linearGradient>
+    <linearGradient id="r600" x1="1064" y1="0" x2="1280" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#F2A65A"/><stop offset="1" stop-color="#F2A65A" stop-opacity=".25"/></linearGradient>
+    <linearGradient id="r560" x1="1064" y1="0" x2="1280" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6FE07D"/><stop offset="1" stop-color="#6FE07D" stop-opacity=".25"/></linearGradient>
+    <linearGradient id="r500" x1="1064" y1="0" x2="1280" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4FD8E0"/><stop offset="1" stop-color="#4FD8E0" stop-opacity=".25"/></linearGradient>
+    <linearGradient id="r450" x1="1064" y1="0" x2="1280" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#7B93E0"/><stop offset="1" stop-color="#7B93E0" stop-opacity=".25"/></linearGradient>
+    <linearGradient id="r400" x1="1064" y1="0" x2="1280" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#9B7EDE"/><stop offset="1" stop-color="#9B7EDE" stop-opacity=".25"/></linearGradient>
+    <filter id="glow" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="soft" x="-10%" y="-200%" width="120%" height="500%"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <style>
+    .name { font: 700 84px "Space Grotesk", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: -1.5px; }
+    .tag  { font: 500 30px "Space Grotesk", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: -.3px; }
+    .body { font: 400 20px Inter, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .mono { font: 500 14px "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace; letter-spacing: 1.6px; }
+    .ray  { animation: shimmer 5s ease-in-out infinite; }
+    .ray:nth-child(2) { animation-delay: -.8s } .ray:nth-child(3) { animation-delay: -1.6s }
+    .ray:nth-child(4) { animation-delay: -2.4s } .ray:nth-child(5) { animation-delay: -3.2s }
+    .ray:nth-child(6) { animation-delay: -4s }
+    .pulse { stroke-dasharray: 60 420; animation: travel 3.2s linear infinite; }
+    @keyframes shimmer { 0%, 100% { opacity: .78 } 50% { opacity: 1 } }
+    @keyframes travel { from { stroke-dashoffset: 480 } to { stroke-dashoffset: 0 } }
+    @media (prefers-reduced-motion: reduce) { .ray, .pulse { animation: none } .pulse { display: none } }
+  </style>
+
+  <g clip-path="url(#card)">
+    <rect width="1280" height="420" fill="#0B0C0F"/>
+    <rect width="1280" height="420" fill="url(#halo)"/>
+
+    <!-- dispersed rays: red deviates least (top), violet most (bottom) -->
+    <g filter="url(#glow)" opacity=".55">
+      <polygon points="1064,222 1064,230 1280,120 1280,166" fill="#E8536B"/>
+      <polygon points="1064,222 1064,230 1280,166 1280,212" fill="#F2A65A"/>
+      <polygon points="1064,222 1064,230 1280,212 1280,258" fill="#6FE07D"/>
+      <polygon points="1064,222 1064,230 1280,258 1280,304" fill="#4FD8E0"/>
+      <polygon points="1064,222 1064,230 1280,304 1280,350" fill="#7B93E0"/>
+      <polygon points="1064,222 1064,230 1280,350 1280,396" fill="#9B7EDE"/>
+    </g>
+    <g>
+      <polygon class="ray" points="1064,222 1064,230 1280,120 1280,166" fill="url(#r680)"/>
+      <polygon class="ray" points="1064,222 1064,230 1280,166 1280,212" fill="url(#r600)"/>
+      <polygon class="ray" points="1064,222 1064,230 1280,212 1280,258" fill="url(#r560)"/>
+      <polygon class="ray" points="1064,222 1064,230 1280,258 1280,304" fill="url(#r500)"/>
+      <polygon class="ray" points="1064,222 1064,230 1280,304 1280,350" fill="url(#r450)"/>
+      <polygon class="ray" points="1064,222 1064,230 1280,350 1280,396" fill="url(#r400)"/>
+    </g>
+
+    <!-- incoming white beam -->
+    <line x1="600" y1="236" x2="903" y2="213" stroke="url(#beam)" stroke-width="10" stroke-linecap="round" filter="url(#soft)" opacity=".6"/>
+    <line x1="600" y1="236" x2="903" y2="213" stroke="url(#beam)" stroke-width="3.5" stroke-linecap="round"/>
+    <line class="pulse" x1="600" y1="236" x2="903" y2="213" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" opacity=".9"/>
+
+    <!-- prism -->
+    <path d="M980 70 L1120 330 L840 330 Z" fill="url(#glass)" fill-opacity=".92"/>
+    <polygon points="903,211 903,215 1064,230 1064,222" fill="#F2F0E9" opacity=".22"/>
+    <path d="M980 70 L1120 330 L840 330 Z" fill="none" stroke="#F2F0E9" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M980 92 L860 318" stroke="#FFFFFF" stroke-opacity=".08" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- text -->
+    <text x="64" y="104" class="mono" fill="#B3B5BF">B.TECH CSE · VIT-AP · 2023 → 2027</text>
+    <text x="60" y="196" class="name" fill="#F2F0E9">Surya Pratik</text>
+    <text x="64" y="248" class="tag" fill="#F2F0E9">Learning. Building. Improving</text>
+    <text x="64" y="300" class="body" fill="#B3B5BF">AI that answers phone calls, sorts waste offline</text>
+    <text x="64" y="328" class="body" fill="#B3B5BF">and traces oil spills to ships. I build it.</text>
+
+    <!-- the six wavelengths, as on the site -->
+    <g class="mono" font-size="12" fill="#B3B5BF">
+      <rect x="64"  y="362" width="10" height="10" rx="2" fill="#9B7EDE"/><text x="82"  y="371">400</text>
+      <rect x="130" y="362" width="10" height="10" rx="2" fill="#7B93E0"/><text x="148" y="371">450</text>
+      <rect x="196" y="362" width="10" height="10" rx="2" fill="#4FD8E0"/><text x="214" y="371">500</text>
+      <rect x="262" y="362" width="10" height="10" rx="2" fill="#6FE07D"/><text x="280" y="371">560</text>
+      <rect x="328" y="362" width="10" height="10" rx="2" fill="#F2A65A"/><text x="346" y="371">600</text>
+      <rect x="394" y="362" width="10" height="10" rx="2" fill="#E8536B"/><text x="412" y="371">680 nm</text>
+    </g>
+  </g>
+  <rect x=".5" y=".5" width="1279" height="419" rx="17.5" fill="none" stroke="#24262C"/>
+</svg>
