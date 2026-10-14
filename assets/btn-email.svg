@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 40" width="104" height="40" role="img" aria-label="Email">
-  <title>Email</title>
-  <rect x=".5" y=".5" width="103" height="39" rx="20" fill="#0B0C0F" stroke="#F2A65A" stroke-opacity=".7"/>
-  <rect x="18" y="16" width="8" height="8" rx="2" fill="#F2A65A"/>
-  <text x="36" y="25" font-family="'Space Grotesk', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#F2F0E9">Email</text>
-</svg>
