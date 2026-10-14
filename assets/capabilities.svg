@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 56" width="900" height="56" role="img" aria-label="Capabilities: AI / ML, Mobile, Web &amp; Backend, Cloud &amp; DevOps, Languages, Hardware">
+  <title>Capabilities: AI / ML, Mobile, Web &amp; Backend, Cloud &amp; DevOps, Languages, Hardware</title>
+  <rect x=".5" y=".5" width="899" height="55" rx="14" fill="#0B0C0F" stroke="#24262C"/>
+  <rect x="38.300000000000004" y="20" width="10" height="10" rx="2.5" fill="#9B7EDE"/>
+  <text x="54.300000000000004" y="30" font-family="'Space Grotesk', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#F2F0E9">AI / ML</text>
+  <rect x="192.4" y="20" width="10" height="10" rx="2.5" fill="#7B93E0"/>
+  <text x="208.4" y="30" font-family="'Space Grotesk', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#F2F0E9">Mobile</text>
+  <rect x="313.7" y="20" width="10" height="10" rx="2.5" fill="#4FD8E0"/>
+  <text x="329.7" y="30" font-family="'Space Grotesk', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#F2F0E9">Web &amp; Backend</text>
+  <rect x="459.6" y="20" width="10" height="10" rx="2.5" fill="#6FE07D"/>
+  <text x="475.6" y="30" font-family="'Space Grotesk', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#F2F0E9">Cloud &amp; DevOps</text>
+  <rect x="630.1" y="20" width="10" height="10" rx="2.5" fill="#F2A65A"/>
+  <text x="646.1" y="30" font-family="'Space Grotesk', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#F2F0E9">Languages</text>
+  <rect x="784.2" y="20" width="10" height="10" rx="2.5" fill="#E8536B"/>
+  <text x="800.2" y="30" font-family="'Space Grotesk', 'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="15" font-weight="600" fill="#F2F0E9">Hardware</text>
+</svg>
