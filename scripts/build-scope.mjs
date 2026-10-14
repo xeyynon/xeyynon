@@ -77,9 +77,16 @@ const cx = glass.x + glass.w / 2, cy = glass.y + glass.h / 2;
 
 // ---- the signature: what the beam writes ------------------------------------------
 
-const sig = layout("Surya Pratik", SCRIPT, { x: cx, y: cy + 8, size: 74, anchor: "middle", track: 10 });
-// Keywords, not a sentence: the beam writes them straight after the name.
-const keywords = layout("VOICE AI · LLM TOOLS · FLUTTER · EMBEDDED", SANS, { x: cx, y: cy + 92, size: 13, anchor: "middle", track: 110 });
+// The beam writes the name, then each keyword in the same place, one at a
+// time, and loops. Seconds: write, hold, decay. The still frame is the name.
+const FRAMES = [
+  { text: "Surya Pratik", size: 74, base: 18, write: 4.0, hold: 2.6, decay: 1.0 },
+  { text: "Voice agents", size: 74, base: 30, write: 1.9, hold: 1.8, decay: 0.7 },
+  { text: "LLM Tools", size: 80, base: 38, write: 1.7, hold: 1.8, decay: 0.7 },
+  { text: "Flutter", size: 80, base: 38, write: 1.5, hold: 1.8, decay: 0.7 },
+  { text: "Embedded", size: 80, base: 38, write: 1.7, hold: 1.8, decay: 0.7 },
+].map((f) => ({ ...f, ...layout(f.text, SCRIPT, { x: cx, y: cy + f.base, size: f.size, anchor: "middle", track: 10 }) }));
+const BLANK = 0.35; // dark gap between frames
 const readouts = [
   layout("CH1  VOICE AI", SANS, { x: glass.x + 22, y: glass.y + 30, size: 11, track: 40 }),
   layout("RUN", SANS, { x: glass.x + glass.w - 22, y: glass.y + 30, size: 11, anchor: "end", track: 40 }),
@@ -179,53 +186,69 @@ function screen(animated) {
 }
 
 /**
- * The beam. Each stroke is its own path so its dash can draw in turn; the
- * cycle is: write (0 to WRITE), hold, phosphor decay, blank, repeat. Strokes
- * are referenced three times (bloom, halo, core) through <use>.
+ * The beam. Every frame (the name, then each keyword) is written stroke by
+ * stroke, held, then decays like phosphor before the next one is written in
+ * the same place; the whole sequence loops. Each stroke is its own path so its
+ * dash can draw in turn, referenced three times (bloom, halo, core) by <use>.
  */
-const CYCLE = 11, WRITE = 0.5, HOLD = 0.8, DECAY = 0.96;
+const CYCLE = FRAMES.reduce((t, f) => t + f.write + f.hold + f.decay + BLANK, 0);
+const ft = (s) => (s / CYCLE).toFixed(4);
+
 function trace(animated) {
-  const strokes = [...sig.strokes, ...keywords.strokes];
-  const lengths = strokes.map(len);
+  if (!animated) return frameSvg(FRAMES[0], 0, null);
+  let clock = 0;
+  return FRAMES.map((f, n) => {
+    const t = { start: clock, written: clock + f.write, decay: clock + f.write + f.hold, gone: clock + f.write + f.hold + f.decay };
+    clock = t.gone + BLANK;
+    return frameSvg(f, n, t);
+  }).join("");
+}
+
+function frameSvg(f, n, t) {
+  const lengths = f.strokes.map(len);
   const total = lengths.reduce((a, b) => a + b, 0);
   let acc = 0;
-  const paths = strokes.map((s, i) => {
+  const paths = f.strokes.map((s, i) => {
+    if (!t) return `<path id="f${n}s${i}" d="${d([s])}"/>`;
     const L = r1(lengths[i]);
-    const t0 = (acc / total) * WRITE, t1 = ((acc + lengths[i]) / total) * WRITE;
+    const t0 = t.start + (acc / total) * f.write, t1 = t.start + ((acc + lengths[i]) / total) * f.write;
     acc += lengths[i];
     // Hidden = dash pushed past the start by more than the widest round cap,
     // or the caps of unwritten strokes show as dots.
     const off = r1(L + 6), gap = r1(L + 12);
-    const anim = animated
-      ? `<animate attributeName="stroke-dashoffset" dur="${CYCLE}s" repeatCount="indefinite" values="${off};${off};0;0" keyTimes="0;${t0.toFixed(4)};${t1.toFixed(4)};1"/>`
-      : "";
-    const dash = animated ? ` stroke-dasharray="${L} ${gap}" stroke-dashoffset="${off}"` : "";
-    return `<path id="b${i}" d="${d([s])}"${dash}>${anim}</path>`;
+    return `<path id="f${n}s${i}" d="${d([s])}" stroke-dasharray="${L} ${gap}" stroke-dashoffset="${off}"><animate attributeName="stroke-dashoffset" dur="${CYCLE}s" repeatCount="indefinite" values="${off};${off};0;0" keyTimes="0;${ft(t0)};${ft(t1)};1"/></path>`;
   });
-  const uses = strokes.map((_, i) => `<use href="#b${i}"/>`).join("");
-  const fade = animated
-    ? `<animate attributeName="opacity" dur="${CYCLE}s" repeatCount="indefinite" values="1;1;.14;0;0" keyTimes="0;${HOLD};${DECAY};.985;1"/>`
-    : "";
-  // the writing spot rides the same strokes, blanked between them
-  const spot = animated ? beamSpot(strokes, lengths, total) : "";
+  const uses = f.strokes.map((_, i) => `<use href="#f${n}s${i}"/>`).join("");
+  // visible from its start until it has decayed; the first frame starts at 0
+  const life = !t ? "" : t.start === 0
+    ? `<animate attributeName="opacity" dur="${CYCLE}s" repeatCount="indefinite" values="1;1;0;0" keyTimes="0;${ft(t.decay)};${ft(t.gone)};1"/>`
+    : `<animate attributeName="opacity" dur="${CYCLE}s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;${ft(t.start)};${ft(t.start + 0.01)};${ft(t.decay)};${ft(t.gone)};1"/>`;
   return `<defs>${paths.join("")}</defs>
-    <g fill="none" stroke-linecap="round" stroke-linejoin="round">${fade}
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round"${t && t.start ? ' opacity="0"' : ""}>${life}
       <g stroke="${P.phosphor}" stroke-width="7" stroke-opacity=".5" filter="url(#bloom)">${uses}</g>
       <g stroke="${P.phosphor}" stroke-width="3.4" stroke-opacity=".55">${uses}</g>
       <g stroke="${P.core}" stroke-width="1.5">${uses}</g>
-    </g>${spot}`;
+    </g>${t ? beamSpot(f.strokes, t) : ""}`;
 }
 
-function beamSpot(strokes, lengths, total) {
-  const all = strokes.map((s) => d([s])).join("");
-  // keyPoints are fractions of the motion path length; movetos add no length,
-  // so the spot hops between strokes exactly as the dashes do.
+/** The writing spot rides the frame's strokes while it writes. keyPoints are
+ *  fractions of path length and movetos add none, so it hops between strokes
+ *  exactly as the dashes do. */
+function beamSpot(strokes, t) {
+  const path = strokes.map((s) => d([s])).join("");
+  const first = t.start === 0;
+  const show = first
+    ? `values="1;1;0;0" keyTimes="0;${ft(t.written)};${ft(t.written + 0.02)};1"`
+    : `values="0;0;1;1;0;0" keyTimes="0;${ft(t.start)};${ft(t.start + 0.01)};${ft(t.written)};${ft(t.written + 0.02)};1"`;
+  const move = first
+    ? `keyPoints="0;1;1" keyTimes="0;${ft(t.written)};1"`
+    : `keyPoints="0;0;1;1" keyTimes="0;${ft(t.start)};${ft(t.written)};1"`;
   return `
     <g opacity="0">
-      <animate attributeName="opacity" dur="${CYCLE}s" repeatCount="indefinite" values="1;1;0;0" keyTimes="0;${WRITE};${WRITE + 0.005};1"/>
+      <animate attributeName="opacity" dur="${CYCLE}s" repeatCount="indefinite" ${show}/>
       <circle r="9" fill="${P.phosphor}" opacity=".35" filter="url(#bloom)"/>
       <circle r="2.6" fill="${P.core}"/>
-      <animateMotion dur="${CYCLE}s" repeatCount="indefinite" calcMode="linear" keyPoints="0;1;1" keyTimes="0;${WRITE};1" path="${all}"/>
+      <animateMotion dur="${CYCLE}s" repeatCount="indefinite" calcMode="linear" ${move} path="${path}"/>
     </g>`;
 }
 
@@ -297,7 +320,7 @@ function scope({ animated, phone }) {
   const [, , vw, vh] = view.split(" ").map(Number);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${view}" width="${vw}" height="${vh}">
   <title>Surya Pratik</title>
-  <desc>A graphite bench oscilloscope whose phosphor beam writes the signature Surya Pratik, then the keywords voice AI, LLM tools, Flutter, embedded.</desc>
+  <desc>A graphite bench oscilloscope whose phosphor beam writes the signature Surya Pratik, then in its place, one at a time: Voice agents, LLM Tools, Flutter, Embedded, on a loop.</desc>
   ${defs()}
   <rect x="${phone ? bezel.x - 18 : 0}" y="${phone ? bezel.y - 18 : 0}" width="${vw}" height="${vh}" rx="${phone ? 18 : 22}" fill="url(#desk)"/>
   ${shell()}

@@ -3,7 +3,7 @@
     <source media="(prefers-reduced-motion: reduce) and (max-width: 600px)" srcset="assets/scope-phone-still.svg">
     <source media="(prefers-reduced-motion: reduce)" srcset="assets/scope-still.svg">
     <source media="(max-width: 600px)" srcset="assets/scope-phone.svg">
-    <img src="assets/scope.svg" width="100%" alt="An oscilloscope whose phosphor beam writes the signature Surya Pratik, then the keywords voice AI, LLM tools, Flutter, embedded. Screen readouts: CH1 voice AI; B.Tech CSE, VIT-AP, 2027; open to work. Knobs labelled AI / ML, Flutter and Embedded.">
+    <img src="assets/scope.svg" width="100%" alt="An oscilloscope whose phosphor beam writes the signature Surya Pratik, then in its place, one at a time on a loop: Voice agents, LLM Tools, Flutter, Embedded. Screen readouts: CH1 voice AI; B.Tech CSE, VIT-AP, 2027; open to work. Knobs labelled AI / ML, Flutter and Embedded.">
   </picture>
 </a>
 
