@@ -31,17 +31,21 @@ const CAP = 662;
 /** Lays out text as pixel-space strokes. `size` is the cap height in px. */
 function layout(text, font, { x, y, size, anchor = "start", track = 0 }) {
   const k = size / CAP;
+  // Drawn by hand: the set has no middle dot, and its hyphen is so long it
+  // reads as a dash.
+  const SPECIAL = { "·": { adv: 340, half: 18, cy: 300 }, "-": { adv: 380, half: 95, cy: 300 } };
+  const adv = (ch) => SPECIAL[ch]?.adv ?? (font.get(ch) ?? font.get(" ")).adv;
   let width = 0;
-  for (const ch of text) width += ((font.get(ch) ?? font.get(" ")).adv + track) * k;
+  for (const ch of text) width += (adv(ch) + track) * k;
   width -= track * k;
   let pen = anchor === "middle" ? x - width / 2 : anchor === "end" ? x - width : x;
   const strokes = [];
   for (const ch of text) {
-    if (ch === "·") {
-      // No middle dot in the Hershey set: draw a short tick at x-height centre.
-      const cx = pen + 170 * k, cy = y - 300 * k;
-      strokes.push([[cx - 18 * k, cy], [cx + 18 * k, cy]]);
-      pen += (340 + track) * k;
+    const sp = SPECIAL[ch];
+    if (sp) {
+      const mx = pen + (sp.adv / 2) * k, my = y - sp.cy * k;
+      strokes.push([[mx - sp.half * k, my], [mx + sp.half * k, my]]);
+      pen += (sp.adv + track) * k;
       continue;
     }
     const g = font.get(ch) ?? font.get(" ");
@@ -73,7 +77,9 @@ const cx = glass.x + glass.w / 2, cy = glass.y + glass.h / 2;
 
 // ---- the signature: what the beam writes ------------------------------------------
 
-const sig = layout("Surya Pratik", SCRIPT, { x: cx, y: cy + 18, size: 74, anchor: "middle", track: 10 });
+const sig = layout("Surya Pratik", SCRIPT, { x: cx, y: cy + 8, size: 74, anchor: "middle", track: 10 });
+// Keywords, not a sentence: the beam writes them straight after the name.
+const keywords = layout("VOICE AI · LLM TOOLS · FLUTTER · EMBEDDED", SANS, { x: cx, y: cy + 92, size: 13, anchor: "middle", track: 110 });
 const readouts = [
   layout("CH1  VOICE AI", SANS, { x: glass.x + 22, y: glass.y + 30, size: 11, track: 40 }),
   layout("RUN", SANS, { x: glass.x + glass.w - 22, y: glass.y + 30, size: 11, anchor: "end", track: 40 }),
@@ -179,7 +185,7 @@ function screen(animated) {
  */
 const CYCLE = 11, WRITE = 0.5, HOLD = 0.8, DECAY = 0.96;
 function trace(animated) {
-  const strokes = sig.strokes;
+  const strokes = [...sig.strokes, ...keywords.strokes];
   const lengths = strokes.map(len);
   const total = lengths.reduce((a, b) => a + b, 0);
   let acc = 0;
@@ -291,7 +297,7 @@ function scope({ animated, phone }) {
   const [, , vw, vh] = view.split(" ").map(Number);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${view}" width="${vw}" height="${vh}">
   <title>Surya Pratik</title>
-  <desc>A graphite bench oscilloscope whose phosphor beam writes the signature Surya Pratik.</desc>
+  <desc>A graphite bench oscilloscope whose phosphor beam writes the signature Surya Pratik, then the keywords voice AI, LLM tools, Flutter, embedded.</desc>
   ${defs()}
   <rect x="${phone ? bezel.x - 18 : 0}" y="${phone ? bezel.y - 18 : 0}" width="${vw}" height="${vh}" rx="${phone ? 18 : 22}" fill="url(#desk)"/>
   ${shell()}
@@ -302,9 +308,188 @@ function scope({ animated, phone }) {
 `;
 }
 
+// ---- link keys -------------------------------------------------------------------
+
+/**
+ * One of the scope's graphite keycaps, sized to sit in a row of three under
+ * the instrument. Each is its own <img> so each can be its own link: links
+ * inside an SVG image do nothing on GitHub.
+ */
+function linkKey(label) {
+  const KW = 360, KH = 92, k = { x: 8, y: 8, w: 344, h: 66, r: 14 };
+  const t = layout(label, SANS, { x: k.x + 62, y: k.y + 40, size: 15, track: 70 });
+  const ax = k.x + k.w - 40, ay = k.y + 33;
+  const arrow = `M${ax} ${ay}H${ax + 18}M${ax + 11} ${ay - 7}L${ax + 18} ${ay}L${ax + 11} ${ay + 7}`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${KW} ${KH}" width="${KW}" height="${KH}">
+  <title>${label}</title>
+  <defs>
+    <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3C3E44"/><stop offset=".55" stop-color="#2A2C31"/><stop offset="1" stop-color="#1D1E22"/>
+    </linearGradient>
+    <linearGradient id="capRim" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".25" stop-color="#fff" stop-opacity=".2"/>
+      <stop offset=".75" stop-color="#fff" stop-opacity=".2"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="lift" x="-10%" y="-20%" width="120%" height="160%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000" flood-opacity=".55"/>
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity=".3"/>
+    </filter>
+    <filter id="bloom" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+  <g filter="url(#lift)"><rect x="${k.x}" y="${k.y}" width="${k.w}" height="${k.h}" rx="${k.r}" fill="url(#cap)"/></g>
+  <path d="M${k.x + k.r} ${k.y + 1}H${k.x + k.w - k.r}" stroke="url(#capRim)" stroke-width="1.4"/>
+  <rect x="${k.x + .5}" y="${k.y + .5}" width="${k.w - 1}" height="${k.h - 1}" rx="${k.r}" fill="none" stroke="#000" stroke-opacity=".55"/>
+  <circle cx="${k.x + 34}" cy="${k.y + 33}" r="7" fill="${P.phosphor}" opacity=".55" filter="url(#bloom)"/>
+  <circle cx="${k.x + 34}" cy="${k.y + 33}" r="3" fill="${P.core}"/>
+  <path d="${d(t.strokes)}" fill="none" stroke="#000" stroke-opacity=".7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 1)"/>
+  <path d="${d(t.strokes)}" fill="none" stroke="#D3D5DA" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="${arrow}" fill="none" stroke="#8C8F97" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+}
+
+// ---- about: a rack module with a phosphor readout --------------------------------
+
+// Facts only, from the resume-backed portfolio data. No taglines.
+const ABOUT = [
+  ["NOW", "Embedded Engineer Intern · Alfaleus Technologies · Hyderabad"],
+  ["BUILDS", "voice agents · LLM tools · Flutter apps · hardware"],
+  ["STUDY", "B.Tech CSE · VIT-AP University · 2027 · CGPA 8.34"],
+  ["LEADS", "Microsoft Student Chapter VIT-AP · Best Student Chapter, Fall 2025"],
+  ["FROM", "Bhilai, Chhattisgarh, India"],
+  ["OPEN TO", "AI/ML · software · Flutter internships"],
+];
+
+/** Greedy wrap by measured width. */
+function wrapText(text, font, size, track, max) {
+  const lines = [];
+  let cur = "";
+  for (const w of text.split(" ")) {
+    const next = cur ? cur + " " + w : w;
+    if (cur && layout(next, font, { x: 0, y: 0, size, track }).width > max) { lines.push(cur); cur = w; } else cur = next;
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+function about({ animated, phone }) {
+  const W2 = phone ? 640 : 1200;
+  const ear = phone ? 0 : 46;
+  const body = { x: phone ? 16 : 40, y: 20, w: phone ? 608 : 1120, r: 18 };
+  const disp = { x: body.x + ear + 24, w: body.w - ear * 2 - 48 };
+  const pad = 28, keySize = phone ? 14 : 11, valSize = phone ? 19 : 14.5;
+  const valX = phone ? 0 : 150, valMax = disp.w - pad * 2 - valX;
+  const lineGap = valSize + 13;
+
+  // Lay the rows out first so the module can size itself to them.
+  const rows = [];
+  let y = phone ? 124 : 132;
+  for (const [k, v] of ABOUT) {
+    const key = layout(k, SANS, { x: disp.x + pad, y, size: keySize, track: 70 });
+    const top = y - valSize - 10;
+    if (phone) y += 30;
+    const lines = wrapText(v, SANS, valSize, 28, valMax).map((line, i) =>
+      layout(line, SANS, { x: disp.x + pad + valX, y: y + i * lineGap, size: valSize, track: 28 }));
+    y += (lines.length - 1) * lineGap;
+    rows.push({ key, lines, top, base: y, bottom: y + 12 });
+    y += phone ? 46 : 40;
+  }
+  disp.y = body.y + 22;
+  disp.h = y - 26 - disp.y + 8;
+  body.h = disp.h + 44;
+  const H2 = body.y + body.h + 30;
+
+  const header = [
+    layout("ABOUT", SANS, { x: disp.x + pad, y: disp.y + 34, size: 11, track: 90 }),
+    layout("CH2", SANS, { x: disp.x + disp.w - pad, y: disp.y + 34, size: 11, anchor: "end", track: 90 }),
+  ];
+  // Rows type in once, left to right, then hold. The scope keeps looping; this does not.
+  const T0 = 0.5, STEP = 0.55, TYPE = 0.6;
+  const rowSvg = rows.map((r, i) => {
+    const keyD = d(r.key.strokes), valD = r.lines.map((l) => d(l.strokes)).join("");
+    const clip = animated ? ` clip-path="url(#row${i})"` : "";
+    const clipDef = animated
+      ? `<clipPath id="row${i}"><rect x="${disp.x}" y="${r1(r.top)}" width="0" height="${r1(r.bottom - r.top)}">
+        <animate attributeName="width" from="0" to="${disp.w}" begin="${(T0 + i * STEP).toFixed(2)}s" dur="${TYPE}s" fill="freeze"/>
+      </rect></clipPath>`
+      : "";
+    return `${clipDef}
+    <g${clip} fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="${keyD}" stroke="${P.phosphor}" stroke-opacity=".55" stroke-width="1.3"/>
+      <path d="${valD}" stroke="${P.phosphor}" stroke-opacity=".35" stroke-width="3.6"/>
+      <path d="${valD}" stroke="${P.core}" stroke-width="1.45"/>
+    </g>`;
+  }).join("");
+
+  // A block cursor that blinks after the last row has typed in.
+  const last = rows[rows.length - 1], lastLine = last.lines[last.lines.length - 1];
+  const curX = r1(disp.x + pad + valX + lastLine.width + 10), curY = r1(last.base - valSize);
+  const cursor = `<rect x="${curX}" y="${curY}" width="${r1(valSize * 0.6)}" height="${valSize}" fill="${P.phosphor}" opacity="${animated ? 0 : 0.8}">${animated
+    ? `<animate attributeName="opacity" values="0;.85;.85;0;0" keyTimes="0;.02;.5;.52;1" dur="1.1s" begin="${(T0 + (rows.length - 1) * STEP + TYPE).toFixed(2)}s" repeatCount="indefinite"/>`
+    : ""}</rect>`;
+
+  const screws = phone ? "" : [[body.x + 23, body.y + 30], [body.x + 23, body.y + body.h - 30], [body.x + body.w - 23, body.y + 30], [body.x + body.w - 23, body.y + body.h - 30]]
+    .map(([sx, sy]) => `<circle cx="${sx}" cy="${sy}" r="8" fill="#0C0D0F"/><circle cx="${sx}" cy="${sy}" r="6.5" fill="url(#screw)"/><path d="M${sx - 4} ${sy}H${sx + 4}M${sx} ${sy - 4}V${sy + 4}" stroke="#141518" stroke-width="1.6"/>`).join("");
+  const ears = phone ? "" : `<path d="M${body.x + ear} ${body.y + 6}V${body.y + body.h - 6}M${body.x + body.w - ear} ${body.y + 6}V${body.y + body.h - 6}" stroke="#000" stroke-opacity=".55"/>
+  <path d="M${body.x + ear + 1} ${body.y + 6}V${body.y + body.h - 6}M${body.x + body.w - ear + 1} ${body.y + 6}V${body.y + body.h - 6}" stroke="#fff" stroke-opacity=".05"/>`;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W2} ${H2}" width="${W2}" height="${H2}">
+  <title>About Surya Pratik</title>
+  <desc>${ABOUT.map(([k, v]) => `${k}: ${v}`).join(". ")}.</desc>
+  <defs>
+    <linearGradient id="aShell" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#34363C"/><stop offset=".1" stop-color="#2A2C31"/><stop offset=".85" stop-color="#1D1E22"/><stop offset="1" stop-color="#141518"/>
+    </linearGradient>
+    <linearGradient id="aRim" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".22"/><stop offset=".7" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="aCrt" cx=".5" cy=".5" r=".75">
+      <stop offset="0" stop-color="#0C1A11"/><stop offset=".7" stop-color="#07100A"/><stop offset="1" stop-color="#030604"/>
+    </radialGradient>
+    <linearGradient id="aGlare" x1="0" y1="0" x2=".6" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".07"/><stop offset=".5" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="screw" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#C9CCD2"/><stop offset=".6" stop-color="#6E7179"/><stop offset="1" stop-color="#2B2D32"/></radialGradient>
+    <clipPath id="aBody"><rect x="${body.x}" y="${body.y}" width="${body.w}" height="${body.h}" rx="${body.r}"/></clipPath>
+    <filter id="aGrain" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="11" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .55 0"/>
+    </filter>
+    <filter id="aSoft" x="-10%" y="-50%" width="120%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="aInset" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feFlood flood-color="#000" flood-opacity=".9"/><feComposite in2="SourceAlpha" operator="out"/>
+      <feGaussianBlur stdDeviation="6"/><feOffset dy="4" result="s"/><feComposite in="s" in2="SourceAlpha" operator="in"/>
+    </filter>
+  </defs>
+  <rect width="${W2}" height="${H2}" rx="${phone ? 18 : 22}" fill="${P.card}"/>
+  <rect x="${body.x + 30}" y="${body.y + body.h - 20}" width="${body.w - 60}" height="34" rx="17" fill="#000" opacity=".7" filter="url(#aSoft)"/>
+  <rect x="${body.x}" y="${body.y}" width="${body.w}" height="${body.h}" rx="${body.r}" fill="url(#aShell)"/>
+  <g clip-path="url(#aBody)"><rect x="${body.x}" y="${body.y}" width="${body.w}" height="${body.h}" filter="url(#aGrain)" opacity=".05"/></g>
+  <path d="M${body.x + body.r} ${body.y + 1}H${body.x + body.w - body.r}" stroke="url(#aRim)" stroke-width="1.5"/>
+  <rect x="${body.x + .5}" y="${body.y + .5}" width="${body.w - 1}" height="${body.h - 1}" rx="${body.r}" fill="none" stroke="#000" stroke-opacity=".6"/>
+  ${ears}${screws}
+  <rect x="${disp.x - 10}" y="${disp.y - 10}" width="${disp.w + 20}" height="${disp.h + 20}" rx="14" fill="#0C0D0F"/>
+  <rect x="${disp.x - 10}" y="${disp.y - 10}" width="${disp.w + 20}" height="${disp.h + 20}" rx="14" fill="#000" filter="url(#aInset)"/>
+  <rect x="${disp.x}" y="${disp.y}" width="${disp.w}" height="${disp.h}" rx="10" fill="url(#aCrt)"/>
+  <path d="${header.map((h) => d(h.strokes)).join("")}" fill="none" stroke="${P.phosphor}" stroke-opacity=".5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M${disp.x + pad} ${disp.y + 52}H${disp.x + disp.w - pad}" stroke="${P.phosphor}" stroke-opacity=".14"/>
+  ${rowSvg}
+  ${cursor}
+  <rect x="${disp.x}" y="${disp.y}" width="${disp.w}" height="${disp.h}" rx="10" fill="url(#aGlare)"/>
+  <rect x="${disp.x + .5}" y="${disp.y + .5}" width="${disp.w - 1}" height="${disp.h - 1}" rx="10" fill="none" stroke="#fff" stroke-opacity=".06"/>
+  ${phone ? "" : `<rect x=".5" y=".5" width="${W2 - 1}" height="${H2 - 1}" rx="22" fill="none" stroke="${P.cardEdge}"/>`}
+</svg>
+`;
+}
+
 const out = (name, svg) => writeFileSync(new URL(`../assets/${name}.svg`, import.meta.url), svg);
 out("scope", scope({ animated: true, phone: false }));
 out("scope-still", scope({ animated: false, phone: false }));
 out("scope-phone", scope({ animated: true, phone: true }));
 out("scope-phone-still", scope({ animated: false, phone: true }));
-console.log("built scope, scope-still, scope-phone, scope-phone-still");
+out("about", about({ animated: true, phone: false }));
+out("about-still", about({ animated: false, phone: false }));
+out("about-phone", about({ animated: true, phone: true }));
+out("about-phone-still", about({ animated: false, phone: true }));
+for (const [file, label] of [["key-portfolio", "PORTFOLIO"], ["key-linkedin", "LINKEDIN"], ["key-email", "EMAIL"]]) out(file, linkKey(label));
+console.log("built scope x4, about x4, 3 link keys");
