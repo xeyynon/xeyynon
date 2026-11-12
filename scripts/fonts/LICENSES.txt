@@ -1,0 +1,14 @@
+Fonts used to draw the README's lettering (subset web files, as served by Google Fonts).
+All are licensed under the SIL Open Font License 1.1.
+
+SpaceGrotesk: Copyright 2020 The Space Grotesk Project Authors (https://github.com/floriankarsten/space-grotesk)
+  License: None
+  https://scripts.sil.org/OFL
+
+IBMPlexMono-Regular: Copyright 2017 IBM Corp. All rights reserved.
+  License: None
+  http://scripts.sil.org/OFL
+
+IBMPlexMono-Medium: Copyright 2017 IBM Corp. All rights reserved.
+  License: None
+  http://scripts.sil.org/OFL
